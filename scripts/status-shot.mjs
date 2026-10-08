@@ -33,7 +33,7 @@ if (!pw) {
 
     if (chromePath) {
         try {
-            execFileSync(chromePath, ['--headless', `--screenshot=${outp}`, '--window-size=540,1600', '--hide-scrollbars', inp]);
+            execFileSync(chromePath, ['--headless', `--screenshot=${outp}`, '--window-size=540,1060', '--hide-scrollbars', inp]);
             process.exit(0);
         } catch (e) {
             console.error(`status-shot: failed to take screenshot with ${chromePath}: ${e.message}`);
