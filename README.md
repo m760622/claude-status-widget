@@ -47,14 +47,18 @@ node tools/status-widget/scripts/status-widget.mjs --out status.html --model "Cl
 
 ---
 
-## 4. How to use it in another project's `CLAUDE.md`
+## 4. Prompts for other AI Assistants
+
+See [PROMPT.md](PROMPT.md) for ready-to-copy prompts formatted for ChatGPT, Claude, Cursor, Windsurf, and Antigravity.
+
+## 5. How to use it in another project's `CLAUDE.md`
 
 1. Paste the contents of `SNIPPET.md` into your project's `CLAUDE.md`.
 2. When the user sends `جججج` or `صصصص`, Claude will automatically run the tool (either from GitHub or locally) and display the session status screenshot.
 
 ---
 
-## 5. Honest limits
+## 6. Honest limits
 
 - **Environment context**: It shows metrics of the host machine where the script executes (a cloud container is not the user's local computer).
 - **Missing metrics**: Values that cannot be measured directly will display as `"—"`.
