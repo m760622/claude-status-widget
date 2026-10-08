@@ -4,7 +4,7 @@
 // Device, memory, disk and repo are read live; the model, context and request numbers can only come from the
 // caller, and show "—" when left out. Claude prints it when the user types "جججج" (see CLAUDE.md).
 import { writeFileSync, readFileSync, readdirSync, statSync } from 'node:fs';
-import { cpus, type, release, arch, loadavg, homedir } from 'node:os';
+import { cpus, type, release, arch, loadavg, homedir, totalmem, freemem } from 'node:os';
 import { execFileSync } from 'node:child_process';
 
 const args = process.argv.slice(2);
@@ -21,7 +21,14 @@ const pct = (a, b) => (b > 0 ? Math.min(100, Math.max(0, (a / b) * 100)) : 0);
 
 const n = cpus().length;
 const cpuPct = Math.min(100, (loadavg()[0] / n) * 100);
-const mem = Object.fromEntries(readFileSync('/proc/meminfo', 'utf8').split('\n').filter(Boolean).map(l => { const [k, v] = l.split(':'); return [k, parseInt(v, 10)]; }));
+const mem = (() => {
+  try {
+    if (readFileSync('/proc/meminfo', 'utf8')) {
+      return Object.fromEntries(readFileSync('/proc/meminfo', 'utf8').split('\n').filter(Boolean).map(l => { const [k, v] = l.split(':'); return [k, parseInt(v, 10)]; }));
+    }
+  } catch {}
+  return { MemTotal: Math.round(totalmem() / 1024), MemAvailable: Math.round(freemem() / 1024) };
+})();
 // In a container /proc/meminfo describes the host, so prefer the cgroup limit and usage (v2, then v1) when they are lower.
 const readNum = f => { try { const t = readFileSync(f, 'utf8').trim(); return /^\d+$/.test(t) ? Number(t) : null; } catch { return null; } };
 const stat = f => { try { return Object.fromEntries(readFileSync(f, 'utf8').trim().split('\n').map(l => l.split(' '))); } catch { return {}; } };
@@ -31,7 +38,7 @@ const cg = [['/sys/fs/cgroup/memory.max', '/sys/fs/cgroup/memory.current', '/sys
   .find(c => c.lim !== null && c.cur !== null && c.lim / 1024 < mem.MemTotal);
 if (cg) { mem.MemTotal = cg.lim / 1024; mem.MemAvailable = Math.max(0, mem.MemTotal - Math.max(0, cg.cur / 1024 - cg.cache)); }
 const memUsed = mem.MemTotal - mem.MemAvailable;
-const disk = run('df', ['-Pk', '/home']).split('\n')[1]?.split(/\s+/) || [];
+const disk = run('df', ['-Pk', homedir()]).split('\n')[1]?.split(/\s+/) || [];
 const diskTotal = Number(disk[1]) || 0, diskUsed = Number(disk[2]) || 0;
 
 const pkg = (() => { try { return JSON.parse(readFileSync('package.json', 'utf8')); } catch { return { name: process.cwd().split('/').pop(), version: '—' }; } })();
