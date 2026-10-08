@@ -27,7 +27,12 @@ const mem = (() => {
       return Object.fromEntries(readFileSync('/proc/meminfo', 'utf8').split('\n').filter(Boolean).map(l => { const [k, v] = l.split(':'); return [k, parseInt(v, 10)]; }));
     }
   } catch {}
-  return { MemTotal: Math.round(totalmem() / 1024), MemAvailable: Math.round(freemem() / 1024) };
+  return { 
+    MemTotal: Math.round(totalmem() / 1024), 
+    MemAvailable: process.platform === 'darwin' 
+      ? Math.round((freemem() + totalmem() * 0.4) / 1024) 
+      : Math.round(freemem() / 1024) 
+  };
 })();
 // In a container /proc/meminfo describes the host, so prefer the cgroup limit and usage (v2, then v1) when they are lower.
 const readNum = f => { try { const t = readFileSync(f, 'utf8').trim(); return /^\d+$/.test(t) ? Number(t) : null; } catch { return null; } };
@@ -112,7 +117,7 @@ writeFileSync(out, `${head}<title>حالة الجلسة</title>
 @media (prefers-color-scheme:light){:root:not([data-theme="dark"]){--bg:#f4f5f7;--card:#fff;--line:#dcdee3;--fg:#15161a;--mut:#5f636e;--acc:#2f5fd0;--ok:#0f8f5b;--warn:#a85f00;--crit:#c62828;--c-cpu:#2f5fd0;--c-mem:#7c3aed;--c-disk:#0d9488;--c-tok:#b45309;--c-model:#be185d;--c-node:#4d7c0f;--c-req:#c2410c;--c-repo:#0369a1;color-scheme:light}}
 :root[data-theme="light"]{--bg:#f4f5f7;--card:#fff;--line:#dcdee3;--fg:#15161a;--mut:#5f636e;--acc:#2f5fd0;--ok:#0f8f5b;--warn:#a85f00;--crit:#c62828;--c-cpu:#2f5fd0;--c-mem:#7c3aed;--c-disk:#0d9488;--c-tok:#b45309;--c-model:#be185d;--c-node:#4d7c0f;--c-req:#c2410c;--c-repo:#0369a1;color-scheme:light}
 *{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--fg);font:14px/1.4 system-ui,"Segoe UI",Tahoma,sans-serif;padding:12px 16px}
-.w{max-width:680px;margin:0 auto;display:grid;gap:8px}
+.w{max-width:680px;margin:0 auto;padding:0 4px;box-sizing:border-box;display:grid;gap:8px}
 .card{background:var(--card);border:1px solid var(--line);border-top:3px solid var(--c,var(--acc));border-radius:12px;padding:8px 12px;min-width:0}
 .row{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap}
 h1{font-size:16px;margin:0}.mut{color:var(--mut);font-size:12px}.v{font-size:15px}
@@ -129,7 +134,7 @@ h1{font-size:16px;margin:0}.mut{color:var(--mut);font-size:12px}.v{font-size:15p
 .chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}.chip{border:1px solid var(--line);border-radius:8px;padding:1px 8px;font-size:12px}.chip b{margin-inline-start:4px}
 </style>${fragment ? '' : '</head><body>'}<div class="w" dir="rtl">
 <div class="card"><div class="row"><h1>حالة الجلسة</h1><span class="mut">${esc(dateAr)} · ${ltr(now)} (السويد)</span></div>
-<div class="row"><span class="mut">${ltr(type() + ' ' + release() + ' · ' + arch())}</span><span class="tag">حاوية سحابية · ${n} أنوية</span></div>
+<div class="row"><span class="mut">${ltr(type() + ' ' + release() + ' · ' + arch())}</span><span class="tag">${process.platform === 'darwin' ? 'جهاز محلي (macOS)' : 'حاوية سحابية'} · ${n} أنوية</span></div>
 <div class="three">
 ${meter('المعالج', cpuPct, 'متوسط الحمل', 'cpu')}
 ${meter('الذاكرة', memPct, ltr(`${gb(memUsed)} / ${gb(mem.MemTotal)}`), 'mem')}
