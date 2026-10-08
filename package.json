@@ -1,0 +1,24 @@
+{
+  "name": "claude-status-widget",
+  "version": "1.0.0",
+  "description": "RTL Arabic status widget for Claude Code sessions with phone-width screenshot tool",
+  "type": "module",
+  "main": "scripts/status-widget.mjs",
+  "bin": {
+    "claude-status-widget": "./bin/status-widget.js",
+    "claude-status-shot": "./bin/status-shot.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/m760622/claude-status-widget.git"
+  },
+  "keywords": [
+    "claude",
+    "claude-code",
+    "status-widget",
+    "rtl",
+    "arabic"
+  ],
+  "author": "m760622",
+  "license": "MIT"
+}
