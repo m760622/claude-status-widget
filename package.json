@@ -1,7 +1,7 @@
 {
   "name": "claude-status-widget",
   "version": "1.0.0",
-  "description": "RTL Arabic status widget for Claude Code sessions with phone-width screenshot tool",
+  "description": "Arabic status widget for Codex, Claude and portable assistant metrics",
   "type": "module",
   "main": "scripts/status-widget.mjs",
   "bin": {
@@ -20,5 +20,8 @@
     "arabic"
   ],
   "author": "m760622",
-  "license": "MIT"
+  "license": "MIT",
+  "scripts": {
+    "test": "node --test tests/*.test.mjs"
+  }
 }

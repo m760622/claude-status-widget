@@ -64,3 +64,21 @@ See [PROMPT.md](PROMPT.md) for ready-to-copy prompts formatted for ChatGPT, Clau
 - **Missing metrics**: Values that cannot be measured directly will display as `"—"`.
 - **Subscription quota**: Quota details are only displayed when explicitly passed in via command-line flags.
 - **Context window**: The maximum context-window limit is not known by the script.
+
+## دعم المساعدين ومصادر القياس
+
+- كودكس: `--provider codex --transcript /absolute/session.jsonl` يقرأ نافذة السياق والتوكنز والحصص من السجل الفعلي، مع منع جمع المخزن مرتين وإزالة أحداث الاستهلاك المكررة.
+- كلود: `--provider claude --transcript /absolute/session.jsonl` يحافظ على قراءة سجلاته، وتحتاج نافذة السياق إلى قياس يمرر صراحة إذا لم يذكرها السجل.
+- الاكتشاف التلقائي: يختار أحدث سجل للمشروع الحالي؛ عند تعدد الجلسات مرر السجل صراحة.
+- جيميني وكيرسر وويندسيرف وغيرها: `--metrics /absolute/metrics.json` يستقبل بيانات موحدة من مضيف المساعد. هذا توافق عبر البيانات، وليس ادعاء قراءة سجلاتها الأصلية تلقائيا.
+- الخيارات `--input --cache --output --calls --ctx-now --ctx-window` تعمل وتتقدم على بيانات السجل. الإدخال يعني التوكنز الجديدة، والمخزن منفصل عنه.
+- القيم المفقودة تظهر غير متاحة، والحصص المنتهية لا تعرض. لا تحوّل النقد إلى نسبة من الحصة.
+- التصوير يدعم `playwright-core` ومتصفح كروم المثبت، إضافة إلى مكتبات التصوير السابقة.
+- قراءة `version.json` تتقدم على نسخة `package.json` عند عرض نسخة المشروع.
+- الذاكرة الحرة والضغط منفصلان على ماك؛ لا يفسر استعمال الذاكرة وحده بأنه ضغط حرج.
+
+مثال المدخل الموحد (الأعداد مثال توضيحي فقط):
+```json
+{"schemaVersion":1,"provider":"gemini","model":"اسم النموذج","context":{"used":200,"window":1000},"lastRequest":{"input":70,"cache":120,"output":10},"calls":3,"quotas":{"week":{"left":43,"resetsAt":"2026-10-15T06:42:38Z"}}}
+```
+احذف أي حقل لا تملك مصدر قياس له. عدد النداءات في سجلات كودكس هو عدد أحداث الاستهلاك الفريدة، وليس عدد استدعاءات الأدوات؛ الأدوات لها قسم منفصل.

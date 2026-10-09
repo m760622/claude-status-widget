@@ -6,14 +6,14 @@ import { execFileSync } from 'node:child_process';
 const req = createRequire(process.cwd() + '/');
 
 let pw;
-try { 
-    pw = req('playwright'); 
-} catch { 
-    try { 
-        pw = req('@playwright/test'); 
-    } catch { 
-        pw = null; 
-    } 
+try {
+    pw = req('playwright');
+} catch {
+    try {
+        try { pw = req('@playwright/test'); } catch { pw = req('playwright-core'); }
+    } catch {
+        pw = null;
+    }
 }
 
 const [,, inp, outp] = process.argv;
@@ -45,7 +45,7 @@ if (!pw) {
     }
 }
 
-const exe = process.env.CHROMIUM_PATH || (existsSync('/opt/pw-browsers/chromium') ? '/opt/pw-browsers/chromium' : undefined);
+const exe = [process.env.CHROMIUM_PATH,process.env.CHROME_PATH,'/Applications/Google Chrome.app/Contents/MacOS/Google Chrome','/opt/pw-browsers/chromium','/usr/bin/google-chrome','/usr/bin/chromium'].find(p=>p && existsSync(p));
 const b = await pw.chromium.launch(exe ? { executablePath: exe } : {}).catch(e => { console.error('status-shot: cannot start Chromium (' + e.message.split('\n')[0] + '); send the artifact link instead of an image.'); process.exit(1); });
 const p = await b.newPage({ viewport: { width: 540, height: 2000 }, deviceScaleFactor: 2, colorScheme: 'dark' });
 await p.goto('file://' + inp);
