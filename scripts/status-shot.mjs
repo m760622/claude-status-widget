@@ -16,7 +16,7 @@ try {
     }
 }
 
-const [,, inp, outp] = process.argv;
+const [,, inp, outp, size] = process.argv;
 
 if (!pw) {
     const chromePaths = [
@@ -33,7 +33,8 @@ if (!pw) {
 
     if (chromePath) {
         try {
-            execFileSync(chromePath, ['--headless', `--screenshot=${outp}`, '--window-size=540,840', '--hide-scrollbars', inp]);
+            const windowSize = size === '--desktop' ? '800,1200' : '540,840';
+            execFileSync(chromePath, ['--headless', `--screenshot=${outp}`, `--window-size=${windowSize}`, '--hide-scrollbars', inp]);
             process.exit(0);
         } catch (e) {
             console.error(`status-shot: failed to take screenshot with ${chromePath}: ${e.message}`);
@@ -47,8 +48,9 @@ if (!pw) {
 
 const exe = [process.env.CHROMIUM_PATH,process.env.CHROME_PATH,'/Applications/Google Chrome.app/Contents/MacOS/Google Chrome','/opt/pw-browsers/chromium','/usr/bin/google-chrome','/usr/bin/chromium'].find(p=>p && existsSync(p));
 const b = await pw.chromium.launch(exe ? { executablePath: exe } : {}).catch(e => { console.error('status-shot: cannot start Chromium (' + e.message.split('\n')[0] + '); send the artifact link instead of an image.'); process.exit(1); });
-const p = await b.newPage({ viewport: { width: 540, height: 2000 }, deviceScaleFactor: 2, colorScheme: 'dark' });
+const viewportWidth = size === '--desktop' ? 800 : 540;
+const p = await b.newPage({ viewport: { width: viewportWidth, height: 2000 }, deviceScaleFactor: 2, colorScheme: 'dark' });
 await p.goto('file://' + inp);
 const h = await p.evaluate(() => Math.ceil(document.querySelector(".w").getBoundingClientRect().bottom) + 12);
-await p.screenshot({ path: outp, clip: { x: 0, y: 0, width: 540, height: h } });
+await p.screenshot({ path: outp, clip: { x: 0, y: 0, width: viewportWidth, height: h } });
 await b.close();
